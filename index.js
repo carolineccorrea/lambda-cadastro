@@ -5,20 +5,29 @@ const tabela = "cadastros";
  
 exports.handler = (event,context,callback) => {
     var user_id = event.body.user_id;
- //   var info = event.body;
-    var name = event.body.name;
-    
+    var item = event.body.item
+
+/*
+const item = {
+    "user_id": 71,
+    "name": "Fulanow"
+}
+*/
     switch (event.httpMethod) {
         case "POST":
+            gravarUsuario(item,callback);
+            
              break;
         
         case "GET":
-            buscarUsuario(user_id,name,callback);
+            buscarUsuario(user_id,callback);
+            console.log(event.body);
 
             break;
         
         default:
             callback(null,"Método não suportado");
+            
             break;
     
         }
@@ -27,21 +36,36 @@ exports.handler = (event,context,callback) => {
 
 
 
- var buscarUsuario = function(user_id,name,callback) {
+ var buscarUsuario = function(user_id,callback) {
         let params =  {
             TableName: tabela,
-            Key : { 'user_id': user_id, 'name': name},
+            Key : { 'user_id': user_id, },
         };
          dynamodb.get(params, function (err, data) {
              if (err) {
                  console.log(err);
            } else {
             callback(null,retorno(200, JSON.stringify(data)));
-             //console.log(user_id,name);
+             console.log(user_id);
              //callback(data);
          }
       });
     };
+    
+ var gravarUsuario = function(item,callback) {
+     let params = {
+            TableName: tabela,
+            Item: item
+        };
+        dynamodb.put(params, function(err, data) {
+            if (err) { 
+                callback(null, erro(500, "Erro na gravação do registro", "0003"));
+            } else { 
+                callback(null, resposta(200, data));
+                
+            }
+        });
+ }
     
 
 var resposta = function(_statusCode, _body) {
